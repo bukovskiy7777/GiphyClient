@@ -18,7 +18,7 @@ class GiphyAdapter constructor(private val gifClickListener:OnGifClickListener):
 
 
     interface OnGifClickListener {
-        fun onGifClick(gif: List<GifDto>, position: Int)
+        fun onGifClick(gifs: List<GifDto>, position: Int)
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {

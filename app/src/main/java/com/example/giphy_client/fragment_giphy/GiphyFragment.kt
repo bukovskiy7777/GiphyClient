@@ -1,5 +1,6 @@
 package com.example.giphy_client.fragment_giphy
 
+import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -29,9 +30,12 @@ class GiphyFragment: Fragment() {
     @Inject
     lateinit var viewModel: GiphyViewModel
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-
+    override fun onAttach(context: Context) {
         GiphyApp.appComponent.inject(this)
+        super.onAttach(context)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         binding = FragmentGiphyBinding.inflate(inflater, container, false)
 
