@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Giphy Client</string>
+    <string name="search_giphy">Search Giphy</string>
+</resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/giphyFragment">
+
+    <fragment
+        android:id="@+id/giphyFragment"
+        android:name="com.example.giphy_client.fragment_giphy.GiphyFragment"
+        tools:layout="@layout/fragment_giphy"
+        android:label="GiphyFragment" >
+        <action
+            android:id="@+id/action_giphyFragment_to_fullScreenFragment"
+            app:destination="@id/fullScreenFragment"
+            app:enterAnim="@anim/enter_from_right"
+            app:exitAnim="@anim/exit_to_left"
+            app:popEnterAnim="@anim/enter_from_left"
+            app:popExitAnim="@anim/exit_to_right"/>
+    </fragment>
+    <fragment
+        android:id="@+id/fullScreenFragment"
+        android:name="com.example.giphy_client.fragment_fullscreen.FullScreenFragment"
+        tools:layout="@layout/fragment_fullscreen"
+        android:label="FullScreenFragment" />
+</navigation>
