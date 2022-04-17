@@ -1,19 +1,16 @@
 package com.example.giphy_client
 
 import android.content.Context
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DecodeFormat
-import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.request.transition.Transition
 import com.example.giphy_client.model.GifDto
 import com.example.giphy_client.model.room.GifDao
 import com.example.giphy_client.model.room.GifEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.io.File
+import java.net.HttpURLConnection
 import javax.inject.Inject
 
 class GifLoader {
@@ -38,35 +35,50 @@ class GifLoader {
 
                     val fileName = gif.id + ".gif"
 
-                    Glide.with(context).asFile()
-                        .load(gif.serverUrl)
-                        .apply(
-                            RequestOptions()
-                            .format(DecodeFormat.PREFER_ARGB_8888)
-                            .override(Target.SIZE_ORIGINAL))
-                        .into(object : SimpleTarget<File?>() {
-                            override fun onResourceReady(resource: File, transition: Transition<in File?>?) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        runCatching {
+                            val request = Request.Builder().url(gif.serverUrl).build()
+                            val response = OkHttpClient().newCall(request).execute()
+                            val body = response.body()
+                            val responseCode = response.code()
+                            if (responseCode >= HttpURLConnection.HTTP_OK &&
+                                responseCode < HttpURLConnection.HTTP_MULT_CHOICE && body != null) {
+                                body.byteStream().apply {
 
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    storeGif(resource, fileName)
-
-                                    gifDao.insert(GifEntity(
-                                            serverId = gif.id,
-                                            localPath = "file://" + context.getFileStreamPath(fileName).absolutePath,
-                                            serverUrl = gif.serverUrl))
+                                    val dir: File = context.filesDir
+                                    val file = File(dir, fileName)
+                                    file.outputStream().use { fileOut ->
+                                        var bytesCopied = 0
+                                        val buffer = ByteArray(1024 * 8)
+                                        var bytes = read(buffer)
+                                        while (bytes >= 0) {
+                                            fileOut.write(buffer, 0, bytes)
+                                            bytesCopied += bytes
+                                            bytes = read(buffer)
+                                        }
+                                    }
+                                    writeToDb(gif, fileName)
                                 }
                             }
-                        })
+                        }
+                    }
                 }
             }
         }
     }
 
-    private fun storeGif(resource: File, fileName: String) {
+    private suspend fun writeToDb(gif: GifDto, fileName: String) {
+        gifDao.insert(GifEntity(
+            serverId = gif.id,
+            localPath = "file://" + context.getFileStreamPath(fileName).absolutePath,
+            serverUrl = gif.serverUrl)
+        )
+    }
 
-        context.openFileOutput(fileName, Context.MODE_PRIVATE).use {
-            it.write(resource.readBytes())
-        }
+    fun deleteFile(id: String) : Boolean {
+        val dir: File = context.filesDir
+        val file = File(dir, "$id.gif")
+        return file.delete()
     }
 
 }
