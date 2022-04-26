@@ -15,4 +15,6 @@ interface AppComponent {
    fun inject(giphyRepository: GiphyRepository)
    fun inject(giphyViewModel: GiphyViewModel)
    fun inject(giphyFragment: GiphyFragment)
+
+   fun viewModelsFactory(): ViewModelFactory
 }

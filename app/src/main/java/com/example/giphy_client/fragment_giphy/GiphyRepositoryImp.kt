@@ -13,7 +13,7 @@ import com.example.giphy_client.fragment_giphy.GiphyService.Companion.RATING
 import com.example.giphy_client.model.GifDto
 import com.example.giphy_client.model.network.ServerResponse
 import com.example.giphy_client.model.room.GifDao
-import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import retrofit2.Response
@@ -21,9 +21,10 @@ import javax.inject.Inject
 
 
 class GiphyRepositoryImp @Inject constructor(
-    private val ioDispatcher: CoroutineDispatcher,
     private val giphyService: GiphyService,
-    private val gifDao: GifDao
+    private val gifDao: GifDao,
+    private val gifLoader: GifLoader,
+    private val connectivityManager: ConnectivityManager
 ) : GiphyRepository {
 
     init {
@@ -34,7 +35,7 @@ class GiphyRepositoryImp @Inject constructor(
     {
         val loader: GifPageLoader = { pageIndex, pageSize ->
 
-            val list = if(ConnectivityManager().isOnline())
+            val list = if(connectivityManager.isOnline())
                 getGifsFromNetwork(pageIndex, pageSize, searchBy)
             else {
                 getGifsFromLocalMemory(pageIndex, pageSize, searchBy)
@@ -53,7 +54,7 @@ class GiphyRepositoryImp @Inject constructor(
     }
 
     private suspend fun getGifsFromLocalMemory(pageIndex: Int, pageSize: Int, searchBy: String): List<GifDto>
-            = withContext(ioDispatcher) {
+            = withContext(Dispatchers.IO) {
         // calculate offset value
         val offset = pageIndex * pageSize
 
@@ -64,7 +65,7 @@ class GiphyRepositoryImp @Inject constructor(
     }
 
     private suspend fun getGifsFromNetwork(pageIndex: Int, pageSize: Int, searchBy: String): List<GifDto>
-            = withContext(ioDispatcher) {
+            = withContext(Dispatchers.IO) {
 
         // calculate offset value
         val offset = pageIndex * pageSize
@@ -85,7 +86,7 @@ class GiphyRepositoryImp @Inject constructor(
         }
 
         // load gifs for persistence
-        GifLoader().loadGifs(listDto)
+        gifLoader.loadGifs(listDto)
 
         // get page
         return@withContext listDto ?: emptyList()

@@ -13,13 +13,10 @@ import java.io.File
 import java.net.HttpURLConnection
 import javax.inject.Inject
 
-class GifLoader {
-
-    @Inject
-    lateinit var context : Context
-
-    @Inject
-    lateinit var gifDao : GifDao
+class GifLoader @Inject constructor(
+    private val context : Context,
+    private val gifDao : GifDao
+) {
 
     init {
         GiphyApp.appComponent.inject(this)

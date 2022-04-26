@@ -6,10 +6,9 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import javax.inject.Inject
 
-class ConnectivityManager {
-
-    @Inject
-    lateinit var context : Context
+class ConnectivityManager @Inject constructor(
+    private var context : Context
+) {
 
     init {
         GiphyApp.appComponent.inject(this)

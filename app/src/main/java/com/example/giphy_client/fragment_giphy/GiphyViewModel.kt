@@ -36,4 +36,12 @@ class GiphyViewModel @Inject constructor(repository: GiphyRepository) : ViewMode
     }
 }
 
+@Suppress("UNCHECKED_CAST")
+class ViewModelFactory @Inject constructor (
+    private val repository: GiphyRepository,
+): ViewModelProvider.Factory {
+
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = GiphyViewModel(repository) as T
+}
+
 

@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.get
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -21,13 +23,11 @@ import com.example.giphy_client.model.GifDto
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.Serializable
-import javax.inject.Inject
 
 class GiphyFragment: Fragment() {
 
     private lateinit var binding: FragmentGiphyBinding
 
-    @Inject
     lateinit var viewModel: GiphyViewModel
 
     override fun onAttach(context: Context) {
@@ -38,6 +38,7 @@ class GiphyFragment: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         binding = FragmentGiphyBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(viewModelStore, GiphyApp.appComponent.viewModelsFactory()).get()
 
         setupSearchInput()
         setupClearButton()

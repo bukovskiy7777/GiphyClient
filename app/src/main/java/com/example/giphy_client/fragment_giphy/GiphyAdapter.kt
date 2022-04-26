@@ -54,7 +54,7 @@ class GiphyAdapter constructor(private val gifClickListener:OnGifClickListener):
                 .load(url)
                 .circleCrop()
                 .placeholder(R.drawable.placeholder_gif)
-                .error(R.drawable.ic_baseline_clear_24)
+                //.error(R.drawable.ic_baseline_clear_24)
                 .into(imageView)
         }
     }
