@@ -16,10 +16,4 @@ class NetworkModule {
         return GiphyService.create()
     }
 
-    @Singleton
-    @Provides
-    fun provideDispatcher(): CoroutineDispatcher {
-        return Dispatchers.IO
-    }
-
 }

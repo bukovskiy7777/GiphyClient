@@ -33,6 +33,7 @@ interface GiphyService {
         const val API_KEY = "xDDYvifJCR5Cs2JPCQ6pOmA56q9HsF0k"
 
         const val PAGE_SIZE = 25
+        const val GIPHY_STARTING_PAGE = 1
 
         const val RATING = "g"
         const val LANG = "en"

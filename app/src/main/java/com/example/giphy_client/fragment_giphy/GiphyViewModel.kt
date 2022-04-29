@@ -3,14 +3,20 @@ package com.example.giphy_client.fragment_giphy
 import androidx.lifecycle.*
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.example.giphy_client.GifLoader
 import com.example.giphy_client.GiphyApp
 import com.example.giphy_client.model.GifDto
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class GiphyViewModel @Inject constructor(repository: GiphyRepository) : ViewModel() {
+class GiphyViewModel (
+    private val repository: GiphyRepository,
+    private val gifLoader: GifLoader) : ViewModel() {
 
     val gifsFlow: Flow<PagingData<GifDto>>
 
@@ -21,7 +27,7 @@ class GiphyViewModel @Inject constructor(repository: GiphyRepository) : ViewMode
 
         gifsFlow = searchBy.asFlow()
             // if user types text too quickly -> filtering intermediate values to avoid excess loads
-            .debounce(1500)
+            .debounce(1000)
             .flatMapLatest {
                 repository.getPagedGifs(it)
             }
@@ -34,6 +40,24 @@ class GiphyViewModel @Inject constructor(repository: GiphyRepository) : ViewMode
         if (this.searchBy.value == value) return
         this.searchBy.value = value
     }
+
+    fun removeGif(gif: GifDto) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = gifLoader.deleteFile(gif.serverId)
+            if (result)
+                repository.removeGifFromDb(gif)
+        }
+    }
+
 }
+
+@Suppress("UNCHECKED_CAST")
+class ViewModelFactory @Inject constructor (
+    private val repository: GiphyRepository,
+    private val gifLoader: GifLoader): ViewModelProvider.Factory {
+
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = GiphyViewModel(repository, gifLoader) as T
+}
+
 
 

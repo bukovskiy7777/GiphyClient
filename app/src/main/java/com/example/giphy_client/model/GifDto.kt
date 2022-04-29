@@ -2,7 +2,6 @@ package com.example.giphy_client.model
 
 import java.io.Serializable
 
-data class GifDto(
-    val id: String,
-    var localPath: String,
-    val serverUrl: String): Serializable
+class GifDto(val serverId: String,
+             var localPath: String,
+             val serverUrl: String): Serializable

@@ -16,10 +16,5 @@ class StorageModule {
         return GifDatabase.getDatabase(context)
     }
 
-    @Singleton
-    @Provides
-    fun provideGifDao(db: GifDatabase): GifDao {
-        return db.getGifDao()
-    }
 
 }
