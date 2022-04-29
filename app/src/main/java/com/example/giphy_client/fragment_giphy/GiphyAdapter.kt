@@ -1,8 +1,8 @@
 package com.example.giphy_client.fragment_giphy
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -12,9 +12,39 @@ import com.example.giphy_client.databinding.ItemGifBinding
 import com.example.giphy_client.model.GifDto
 
 
-class GiphyAdapter constructor(private val gifClickListener:OnGifClickListener): PagingDataAdapter<GifDto, GiphyAdapter.Holder>(GifsDiffCallback()) {
+class GiphyAdapter constructor(private val gifClickListener:OnGifClickListener)
+    : PagingDataAdapter<GifDto, GiphyAdapter.Holder>(GifsDiffCallback()) {
 
-   class Holder(val binding: ItemGifBinding) : RecyclerView.ViewHolder(binding.root)
+   class Holder(val binding: ItemGifBinding) : RecyclerView.ViewHolder(binding.root) {
+
+       var gifDto: GifDto? = null
+       var gifPosition = 0
+
+       fun loadGig(gifDto: GifDto, gifPosition: Int) {
+
+           this.gifDto = gifDto
+           this.gifPosition = gifPosition
+
+           binding.gifImageView.visibility = View.VISIBLE
+
+           val url = gifDto.localPath.ifEmpty { gifDto.serverUrl }
+
+           val context = binding.gifImageView.context
+           if (url.isBlank()) {
+               Glide.with(context)
+                   .load(R.drawable.ic_baseline_clear_24)
+                   .into(binding.gifImageView)
+           } else {
+               Glide.with(context)
+                   .asGif()
+                   .load(url)
+                   .circleCrop()
+                   .placeholder(R.drawable.placeholder_gif)
+                   //.error(R.drawable.ic_baseline_clear_24)
+                   .into(binding.gifImageView)
+           }
+       }
+   }
 
 
     interface OnGifClickListener {
@@ -25,10 +55,7 @@ class GiphyAdapter constructor(private val gifClickListener:OnGifClickListener):
         val gif = getItem(position) ?: return
         with (holder.binding) {
 
-            if (gif.localPath.isEmpty())
-                loadGig(gifImageView, gif.serverUrl)
-            else
-                loadGig(gifImageView, gif.localPath)
+            holder.loadGig(gif, position)
 
             gifImageView.setOnClickListener {
                 gifClickListener.onGifClick(snapshot().items, position)
@@ -41,31 +68,14 @@ class GiphyAdapter constructor(private val gifClickListener:OnGifClickListener):
         val binding = ItemGifBinding.inflate(inflater, parent, false)
         return Holder(binding)
     }
-
-    private fun loadGig(imageView: ImageView, url: String) {
-        val context = imageView.context
-        if (url.isNullOrBlank()) {
-            Glide.with(context)
-                .load(R.drawable.ic_baseline_clear_24)
-                .into(imageView)
-        } else {
-            Glide.with(context)
-                .asGif()
-                .load(url)
-                .circleCrop()
-                .placeholder(R.drawable.placeholder_gif)
-                .error(R.drawable.ic_baseline_clear_24)
-                .into(imageView)
-        }
-    }
 }
 
 class GifsDiffCallback : DiffUtil.ItemCallback<GifDto>() {
     override fun areItemsTheSame(oldItem: GifDto, newItem: GifDto): Boolean {
-        return oldItem.id == newItem.id
+        return oldItem.serverId == newItem.serverId
     }
 
     override fun areContentsTheSame(oldItem: GifDto, newItem: GifDto): Boolean {
-        return oldItem == newItem
+        return oldItem.serverId == newItem.serverId
     }
 }

@@ -1,6 +1,6 @@
 package com.example.giphy_client.model.network
 
-import com.example.giphy_client.model.GifDto
+import com.example.giphy_client.model.room.GifSearchHistory
 
 data class GifServerObject(
     val type: String,
@@ -14,20 +14,25 @@ data class GifServerObject(
         val fixed_width: FixedWidth
     ) {
 
-        class FixedHeightSmall (
+        data class FixedHeightSmall (
             val height: Int,
             val width: Int,
             val url: String,
         )
 
-        class FixedWidth (
+        data class FixedWidth (
             val height: Int,
             val width: Int,
             val url: String,
         )
     }
 
-    fun toGifDto(): GifDto = GifDto(id,  "",images.fixed_width.url)
+    fun toGifSearchHistory(searchQuery: String): GifSearchHistory
+        = GifSearchHistory(
+            serverId = id,
+            searchQuery = searchQuery,
+            localPath = "",
+            serverUrl = images.fixed_width.url)
 
 }
 
